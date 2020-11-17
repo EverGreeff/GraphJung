@@ -18,7 +18,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
+import javax.swing.SwingConstants; 
 
 import org.apache.commons.collections15.Factory;
 import org.apache.commons.collections15.Transformer;
