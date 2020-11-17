@@ -28,6 +28,7 @@ import edu.uci.ics.jung.algorithms.layout.*;
 import edu.uci.ics.jung.algorithms.shortestpath.BFSDistanceLabeler;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseGraph;
+import edu.uci.ics.jung.graph.SparseMultigraph;
 import edu.uci.ics.jung.graph.util.Pair;
 import edu.uci.ics.jung.visualization.Layer;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
@@ -41,7 +42,7 @@ public class Exemplo extends JPanel {
 
     private String origem;
     private String destino;
-    private Graph<String, Number> grafo;
+    private Graph<String, Double> grafo;
     private Set<String> caminho;
 
     public Exemplo() {
@@ -49,9 +50,9 @@ public class Exemplo extends JPanel {
         this.grafo = criaGrafo();
 
         // define layout do grafo
-        final Layout<String, Number> layout = new FRLayout<String, Number>(grafo);
-        //final Layout<String,Number> layout = new KKLayout<String,Number>(grafo);
-        final VisualizationViewer<String, Number> vv = new VisualizationViewer<String, Number>(layout);
+        final Layout<String, Double> layout = new FRLayout<String, Double>(grafo);
+        //final Layout<String,Double> layout = new KKLayout<String,Double>(grafo);
+        final VisualizationViewer<String, Double> vv = new VisualizationViewer<String, Double>(layout);
         vv.setBackground(Color.WHITE);
 
         // define como desenhar os vertices e exibir suas legendas
@@ -61,9 +62,9 @@ public class Exemplo extends JPanel {
 
         // define como desenhar as arestas e exibir suas legendas
         vv.getRenderContext().setEdgeDrawPaintTransformer(new PintarAresta());
-        //vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<Number>());
+        //vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<Double>());
 
-        vv.setGraphMouse(new DefaultModalGraphMouse<String, Number>());
+        vv.setGraphMouse(new DefaultModalGraphMouse<String, Double>());
         vv.addPostRenderPaintable(new VisualizationViewer.Paintable() {
             public boolean useTransform() {
                 return true;
@@ -72,7 +73,7 @@ public class Exemplo extends JPanel {
             public void paint(Graphics g) {
                 if (caminho != null) {
                     // para cada aresta, pinte as que fazem parte do caminho minimo
-                    for (Number e : layout.getGraph().getEdges()) {
+                    for (Double e : layout.getGraph().getEdges()) {
                         if (marcado(e)) {
                             String v1 = grafo.getEndpoints(e).getFirst();
                             String v2 = grafo.getEndpoints(e).getSecond();
@@ -80,7 +81,7 @@ public class Exemplo extends JPanel {
                             Point2D p2 = layout.transform(v2);
                             p1 = vv.getRenderContext().getMultiLayerTransformer().transform(Layer.LAYOUT, p1);
                             p2 = vv.getRenderContext().getMultiLayerTransformer().transform(Layer.LAYOUT, p2);
-                            Renderer<String, Number> renderer = vv.getRenderer();
+                            Renderer<String, Double> renderer = vv.getRenderer();
                             renderer.renderEdge(vv.getRenderContext(), layout, e);
                         }
                     }
@@ -93,7 +94,7 @@ public class Exemplo extends JPanel {
         add(controles(), BorderLayout.SOUTH);
     }
 
-    boolean marcado(Number e) {
+    boolean marcado(Double e) {
         Pair<String> aresta = grafo.getEndpoints(e);
         String v1 = aresta.getFirst();
         String v2 = aresta.getSecond();
@@ -128,9 +129,9 @@ public class Exemplo extends JPanel {
         }
     }
 
-    public class PintarAresta implements Transformer<Number, Paint> {
+    public class PintarAresta implements Transformer<Double, Paint> {
 
-        public Paint transform(Number e) {
+        public Paint transform(Double e) {
             if (caminho == null || caminho.size() == 0) {
                 return Color.BLACK;
             }
@@ -140,6 +141,8 @@ public class Exemplo extends JPanel {
                 return Color.LIGHT_GRAY;
             }
         }
+
+ 
     }
 
     private JPanel controles() {
@@ -185,7 +188,7 @@ public class Exemplo extends JPanel {
         if (origem == null || destino == null) {
             return;
         }
-        BFSDistanceLabeler<String, Number> bdl = new BFSDistanceLabeler<String, Number>();
+        BFSDistanceLabeler<String, Double> bdl = new BFSDistanceLabeler<String, Double>();
         bdl.labelDistances(grafo, origem);
         caminho = new HashSet<String>();
 
@@ -212,28 +215,42 @@ public class Exemplo extends JPanel {
     }
 
     /*---------------- Constroi e retorna o grafo utilizado ----------------*/
-    private Graph<String, Number> criaGrafo() {
-        // cria grafo aleatorio
-        Graph<String, Number> g = new EppsteinPowerLawGenerator<String, Number>(new GraphFactory(), new VertexFactory(), new EdgeFactory(), 26, 50, 50).create();
+    private Graph<String, Double> criaGrafo() {
 
-        // elimina eventuais vertices sem arestas
-        Set<String> remover = new HashSet<String>();
-        for (String v : g.getVertices()) {
-            if (g.degree(v) == 0) {
-                remover.add(v);
-            }
-        }
-        for (String v : remover) {
-            g.removeVertex(v);
-        }
+        Graph<String, Double> g = new SparseMultigraph<String, Double>();
+        g.addEdge(9.8, "Westfália", "Teutônia");
+        g.addEdge(19.7, "Imigrante", "Teutônia");
+        g.addEdge(11.6, "Westfália", "Imigrante");
+        g.addEdge(25.0, "Estrêla", "Westfália");
+        g.addEdge(21.5, "Estrêla", "Teutônia");
+        g.addEdge(23.5, "Lajeado", "Teutônia");
+        g.addEdge(4.6, "Lajeado", "Estrêla");
+        g.addEdge(26.9, "Lajeado", "Westfália");
+        g.addEdge(35.4, "Imigrante", "Garibaldi");
+        g.addEdge(48.0, "Imigrante", "Bento Gonçalves");
+        g.addEdge(75.4, "Lajeado", "Bento Gonçalves");
+        g.addEdge(113.0, "Lajeado", "Porto Alegre");
+        g.addEdge(50.4, "Portão", "Porto Alegre");
+        g.addEdge(86.8, "Portão", "Lajeado");
+        g.addEdge(22.7, "Portão", "Montenegro");
+        g.addEdge(64.7, "Lajeado", "Montenegro");
+        g.addEdge(79.4, "Imigrante", "Montenegro");
+        g.addEdge(78.4, "Imigrante", "Caxias do Sul");
+        g.addEdge(69.2, "Gramado", "Caxias do Sul");
+        g.addEdge(81.1, "Farroupilha", "Lajeado");
+        g.addEdge(22.6, "Lajeado", "Fazenda Vilanova");
+        g.addEdge(31.5, "Fazenda Vilanova", "Taquari");
+        g.addEdge(58.2, "Westfália", "Taquari");
+        g.addEdge(81.6, "Santa Cruz do Sul", "Taquari");
+
 
         return g;
     }
 
-    static class GraphFactory implements Factory<Graph<String, Number>> {
+    static class GraphFactory implements Factory<Graph<String, Double>> {
 
-        public Graph<String, Number> create() {
-            return new SparseGraph<String, Number>();
+        public Graph<String, Double> create() {
+            return new SparseGraph<String, Double>();
         }
     }
 
@@ -246,11 +263,11 @@ public class Exemplo extends JPanel {
         }
     }
 
-    static class EdgeFactory implements Factory<Number> {
+    static class EdgeFactory implements Factory<Double> {
 
-        int count;
+        double count;
 
-        public Number create() {
+        public Double create() {
             return count++;
         }
     }
