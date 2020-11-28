@@ -43,6 +43,18 @@ import java.util.ArrayList;
  */
 public class Exemplo extends JPanel {
 
+    private class CityDistance {
+        public double distance;
+        public String city1;
+        public String city2;
+        
+        public CityDistance(double distance, String city1, String city2) {
+            this.distance = distance;
+            this.city1 = city1;
+            this.city2 = city2;
+        }
+    }
+    
     private String origem;
     private String destino;
     private Graph<String, Double> grafo;
@@ -50,8 +62,10 @@ public class Exemplo extends JPanel {
     private String maior;
     private String menor;
     private int nroCitysMidle;
+    private ArrayList<CityDistance> citysDistances;
 
     public Exemplo() {
+        citysDistances = new ArrayList<CityDistance>();
         // chama metodo auxiliar que constroi o grafo
         this.grafo = criaGrafo();
 
@@ -266,34 +280,37 @@ public class Exemplo extends JPanel {
 
     /*---------------- Constroi e retorna o grafo utilizado ----------------*/
     private Graph<String, Double> criaGrafo() {
+        citysDistances.add(new CityDistance(9.8, "Westfália", "Teutônia"));
+        citysDistances.add(new CityDistance(19.7, "Imigrante", "Teutônia"));
+        citysDistances.add(new CityDistance(11.6, "Westfália", "Imigrante"));
+        citysDistances.add(new CityDistance(25.0, "Estrêla", "Westfália"));
+        citysDistances.add(new CityDistance(21.5, "Estrêla", "Teutônia"));
+        citysDistances.add(new CityDistance(23.5, "Lajeado", "Teutônia"));
+        citysDistances.add(new CityDistance(4.6, "Lajeado", "Estrêla"));
+        citysDistances.add(new CityDistance(26.9, "Lajeado", "Westfália"));
+        citysDistances.add(new CityDistance(35.4, "Imigrante", "Garibaldi"));
+        citysDistances.add(new CityDistance(48.0, "Imigrante", "Bento Gonçalves"));
+        citysDistances.add(new CityDistance(75.4, "Lajeado", "Bento Gonçalves"));
+        citysDistances.add(new CityDistance(113.0, "Lajeado", "Porto Alegre"));
+        citysDistances.add(new CityDistance(50.4, "Portão", "Porto Alegre"));
+        citysDistances.add(new CityDistance(86.8, "Portão", "Lajeado"));
+        citysDistances.add(new CityDistance(22.7, "Portão", "Montenegro"));
+        citysDistances.add(new CityDistance(64.7, "Lajeado", "Montenegro"));
+        citysDistances.add(new CityDistance(79.4, "Imigrante", "Montenegro"));
+        citysDistances.add(new CityDistance(78.4, "Imigrante", "Caxias do Sul"));
+        citysDistances.add(new CityDistance(69.2, "Gramado", "Caxias do Sul"));
+        citysDistances.add(new CityDistance(81.1, "Farroupilha", "Lajeado"));
+        citysDistances.add(new CityDistance(22.6, "Lajeado", "Fazenda Vilanova"));
+        citysDistances.add(new CityDistance(31.5, "Fazenda Vilanova", "Taquari"));
+        citysDistances.add(new CityDistance(58.2, "Westfália", "Taquari"));
+        citysDistances.add(new CityDistance(81.6, "Santa Cruz do Sul", "Taquari"));
 
         Graph<String, Double> g = new SparseMultigraph<String, Double>();
-        g.addEdge(9.8, "Westfália", "Teutônia");
-        g.addEdge(19.7, "Imigrante", "Teutônia");
-        g.addEdge(11.6, "Westfália", "Imigrante");
-        g.addEdge(25.0, "Estrêla", "Westfália");
-        g.addEdge(21.5, "Estrêla", "Teutônia");
-        g.addEdge(23.5, "Lajeado", "Teutônia");
-        g.addEdge(4.6, "Lajeado", "Estrêla");
-        g.addEdge(26.9, "Lajeado", "Westfália");
-        g.addEdge(35.4, "Imigrante", "Garibaldi");
-        g.addEdge(48.0, "Imigrante", "Bento Gonçalves");
-        g.addEdge(75.4, "Lajeado", "Bento Gonçalves");
-        g.addEdge(113.0, "Lajeado", "Porto Alegre");
-        g.addEdge(50.4, "Portão", "Porto Alegre");
-        g.addEdge(86.8, "Portão", "Lajeado");
-        g.addEdge(22.7, "Portão", "Montenegro");
-        g.addEdge(64.7, "Lajeado", "Montenegro");
-        g.addEdge(79.4, "Imigrante", "Montenegro");
-        g.addEdge(78.4, "Imigrante", "Caxias do Sul");
-        g.addEdge(69.2, "Gramado", "Caxias do Sul");
-        g.addEdge(81.1, "Farroupilha", "Lajeado");
-        g.addEdge(22.6, "Lajeado", "Fazenda Vilanova");
-        g.addEdge(31.5, "Fazenda Vilanova", "Taquari");
-        g.addEdge(58.2, "Westfália", "Taquari");
-        g.addEdge(81.6, "Santa Cruz do Sul", "Taquari");
 
-
+        for (CityDistance citysDistance : citysDistances) {
+            g.addEdge(citysDistance.distance, citysDistance.city1, citysDistance.city2);
+        }
+        
         return g;
     }
 
@@ -345,6 +362,16 @@ public class Exemplo extends JPanel {
         nroCitysMidle = -1;
     }
     
+    private double getCitysDistance(String city1, String city2) {
+        for (CityDistance citysDistance : citysDistances) {
+            if (citysDistance.city1.equals(city1) &&
+                citysDistance.city2.equals(city2)) {
+                return citysDistance.distance;
+            }
+        }
+        return 0.0;
+    }
+    
     private void MaiorDistancia() {
         String resultOrigem = "";
         String resultDestino = "";
@@ -354,11 +381,15 @@ public class Exemplo extends JPanel {
                 this.origem = cityOrigem;
                 this.destino = cityDestino;
                 calculaCaminho();
-//                if (countCitys > nro) {
-//                    nro = countCitys;
+                double distancia = 0.0;
+                for (int i = 1; i < caminho.size(); i++) {
+                    distancia += getCitysDistance(String.valueOf(caminho.toArray()[i-1]), String.valueOf(caminho.toArray()[i]));
+                }
+                if (distancia > resultDistancia) {
+                    resultDistancia = distancia;
                     resultOrigem = cityOrigem;
                     resultDestino = cityDestino;
-//                }
+                }
             }
         }
         this.origem = resultOrigem;
