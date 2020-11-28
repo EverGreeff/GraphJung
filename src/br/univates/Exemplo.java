@@ -216,7 +216,6 @@ public class Exemplo extends JPanel {
         opcoes.setBackground(Color.WHITE);
         opcoes.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                zera();
                 String v = (String) opcoes.getSelectedItem();
                 if (inicio) {
                     origem = v;
