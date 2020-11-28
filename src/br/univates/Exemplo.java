@@ -35,6 +35,9 @@ import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.DefaultModalGraphMouse;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer;
+import java.awt.Button;
+import java.awt.List;
+import java.util.ArrayList;
 
 /* Demonstracao do calculo e exibicao do algoritmo de caminho minimo
  */
@@ -44,6 +47,9 @@ public class Exemplo extends JPanel {
     private String destino;
     private Graph<String, Double> grafo;
     private Set<String> caminho;
+    private String maior;
+    private String menor;
+    private int nroCitysMidle;
 
     public Exemplo() {
         // chama metodo auxiliar que constroi o grafo
@@ -111,6 +117,12 @@ public class Exemplo extends JPanel {
     public class PreencherVertice<V> implements Transformer<V, Paint> {
 
         public Paint transform(V v) {
+            if (v == maior) {
+                return Color.RED;
+            }
+            if (v == menor) {
+                return Color.BLUE;
+            }
             if (v == origem) {
                 return Color.BLUE;
             }
@@ -156,8 +168,41 @@ public class Exemplo extends JPanel {
         JPanel jp3 = new JPanel();
         jp3.add(new JLabel("destino:", SwingConstants.LEFT));
         jp3.add(selecionar(false));
+        JPanel jp4 = new JPanel();
+        Button btn1 = new Button("Par de cidades com maior distância entre si");
+        btn1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                zera();
+                MaiorDistancia();
+                repaint();
+            }
+        });
+        jp4.add(btn1);
+        JPanel jp5 = new JPanel();
+        Button btn2 = new Button("Par de cidades com o maior número de cidades intermediárias entre si");
+        btn2.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                zera();
+                MaiorNroCidades();
+                repaint();
+            }
+        });
+        jp5.add(btn2);
+        JPanel jp6 = new JPanel();
+        Button btn3 = new Button("Maior e menor conectividade");
+        btn3.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                zera();
+                MaiorMenorConectividade();
+                repaint();
+            }
+        });
+        jp6.add(btn3);
         jp.add(jp2);
         jp.add(jp3);
+        jp.add(jp4);
+        jp.add(jp5);
+        jp.add(jp6);
         return jp;
     }
 
@@ -171,6 +216,7 @@ public class Exemplo extends JPanel {
         opcoes.setBackground(Color.WHITE);
         opcoes.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                zera();
                 String v = (String) opcoes.getSelectedItem();
                 if (inicio) {
                     origem = v;
@@ -196,14 +242,19 @@ public class Exemplo extends JPanel {
         String v = destino;
         Set<String> pred = bdl.getPredecessors(v);
         caminho.add(destino);
+        nroCitysMidle = 0;
         while (pred != null && pred.size() > 0) {
             v = pred.iterator().next();
             caminho.add(v);
             if (v == origem) {
                 return;
+            } 
+            if (v != destino) {
+                nroCitysMidle += 1;
             }
             pred = bdl.getPredecessors(v);
         }
+        return;
     }
 
     public static void main(String[] args) {
@@ -270,5 +321,94 @@ public class Exemplo extends JPanel {
         public Double create() {
             return count++;
         }
+    }
+    
+    private ArrayList<String> getCitys() {
+        ArrayList<String> citys = new ArrayList();
+        
+        for (Double edge : grafo.getEdges()) {
+            for (String incidentVertice : grafo.getIncidentVertices(edge)) {
+                if (!citys.contains(incidentVertice)) {
+                    citys.add(incidentVertice);
+                }
+            }
+        }
+        
+        return citys;
+    }
+    
+    private void zera() {
+        maior = "";
+        menor = "";
+        origem = "";
+        destino = "";
+        caminho = null;
+        nroCitysMidle = -1;
+    }
+    
+    private void MaiorDistancia() {
+        String resultOrigem = "";
+        String resultDestino = "";
+        double resultDistancia = 0.0;
+        for (String cityOrigem : getCitys()) {
+            for (String cityDestino : getCitys()) {
+                this.origem = cityOrigem;
+                this.destino = cityDestino;
+                calculaCaminho();
+//                if (countCitys > nro) {
+//                    nro = countCitys;
+                    resultOrigem = cityOrigem;
+                    resultDestino = cityDestino;
+//                }
+            }
+        }
+        this.origem = resultOrigem;
+        this.destino = resultDestino;
+        calculaCaminho();
+    }
+    
+    private void MaiorNroCidades() {
+        String resultOrigem = "";
+        String resultDestino = "";
+        int nro = 0;
+        for (String cityOrigem : getCitys()) {
+            for (String cityDestino : getCitys()) {
+                this.origem = cityOrigem;
+                this.destino = cityDestino;
+                calculaCaminho();
+                if (nroCitysMidle > nro) {
+                    nro = nroCitysMidle;
+                    resultOrigem = cityOrigem;
+                    resultDestino = cityDestino;
+                }
+            }
+        }
+        this.origem = resultOrigem;
+        this.destino = resultDestino;
+        calculaCaminho();
+    }
+    
+    private void MaiorMenorConectividade() {
+        int menorC = 99;
+        String nameMenorC = "";
+        int maiorC = 0;
+        String nameMaiorC = "";
+        
+        for (String city : getCitys()) {
+            int conects = grafo.getInEdges(city).size();
+            if (conects > maiorC) {
+                maiorC = conects;
+                nameMaiorC = city;
+            }
+            if (conects < menorC) {
+                menorC = conects;
+                nameMenorC = city;
+            }
+        }
+        
+        PintarAresta aresta = new PintarAresta();
+        
+        maior = nameMaiorC;
+        menor = nameMenorC;
     }
 }
